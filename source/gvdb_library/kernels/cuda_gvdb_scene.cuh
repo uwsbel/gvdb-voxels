@@ -73,19 +73,24 @@ struct ALIGN(16) ScnRay {
 	uint		pndx;
 };
 
-#ifdef CUDA_PATHWAY
-	__constant__ ScnInfo		scn;					// Scene Info
-	#define TRANSFER_FUNC		scn.transfer			// Transfer Func Buffer
-	#define SCN_DBUF			(float*) scn.dbuf		// Depth Buffer
-#endif
+// #ifdef CUDA_PATHWAY
+// 	__constant__ ScnInfo		scn;					// Scene Info
+// 	#define TRANSFER_FUNC		scn.transfer			// Transfer Func Buffer
+// 	#define SCN_DBUF			(float*) scn.dbuf		// Depth Buffer
+// #endif
 
-#ifdef OPTIX_PATHWAY
-	rtDeclareVariable(ScnInfo, scn, , );				// Scene info
-	rtBuffer<float4>	scn_transfer_func;				// Transfer func	
+// #ifdef OPTIX_PATHWAY
+// 	rtDeclareVariable(ScnInfo, scn, , );				// Scene info
+// 	rtBuffer<float4>	scn_transfer_func;				// Transfer func	
 	
-	#define TRANSFER_FUNC		scn_transfer_func
-	#define SCN_DBUF			0x0 
-#endif
+// 	#define TRANSFER_FUNC		scn_transfer_func
+// 	#define SCN_DBUF			0x0 
+// #endif
+
+
+__constant__ ScnInfo		scn;
+#define TRANSFER_FUNC		scn.transfer	
+#define SCN_DBUF			0x0
 
 #define SCN_SHADE			scn.shading
 #define SCN_EXTINCT			scn.extinct.x
