@@ -185,11 +185,11 @@ inline __device__ float3 getGradientTricubic ( VDBInfo* gvdb, uchar chan, float3
 //   `vmin`: The minimum AABB vertex of the brick in index-space
 __device__ float3 rayLevelSet ( VDBInfo* gvdb, uchar chan, float3& p, float3 o, float3 rpos, float3 rdir, float3 vmin )
 {
-	float dt = SCN_FINESTEP;
+	float dt = 0.01f;// SCN_FINESTEP;
 	float3 pt = dt*rdir;
 	
 	for ( int i=0; i < 512; i++ ) {
-		if ( tex3D<float>( gvdb->volIn[chan], p.x+o.x, p.y+o.y, p.z+o.z ) < SCN_THRESH )	// trilinear test
+		if ( tex3D<float>( gvdb->volIn[chan], p.x+o.x, p.y+o.y, p.z+o.z ) < 0 )	//SCN_THRESH  // trilinear test
 			return p + vmin;		
 		p += pt;				
 	}
@@ -392,11 +392,11 @@ __device__ void rayLevelSetBrick ( VDBInfo* gvdb, uchar chan, int nodeid, float3
 	VDBNode* node	= getNode ( gvdb, 0, nodeid, &vmin );			// Get the VDB leaf node	
 	float3  o = make_float3( node->mValue ) ;				// Atlas sub-volume to trace	
 	float3	p = pos + t.x*dir - vmin;					// sample point in index coords			
-	t.x = SCN_DIRECTSTEP * ceilf( t.x / SCN_DIRECTSTEP );
-
+	//t.x = SCN_DIRECTSTEP * ceilf( t.x / SCN_DIRECTSTEP );
+	t.x = 0.01f * ceilf(t.x / 0.1f);
 	for (int iter=0; iter < MAX_ITER && p.x >=0 && p.y >=0 && p.z >=0 && p.x <= gvdb->res[0] && p.y <= gvdb->res[0] && p.z <= gvdb->res[0]; iter++) {	
 
-		if (tex3D<float>(gvdb->volIn[chan], p.x+o.x, p.y+o.y, p.z+o.z ) < SCN_THRESH ) {			// test atlas for zero crossing
+		if (tex3D<float>(gvdb->volIn[chan], p.x+o.x, p.y+o.y, p.z+o.z ) < 0 ) {	//SCN_THRESH		// test atlas for zero crossing
 			hit = rayLevelSet ( gvdb, chan, p, o, pos, dir, vmin );
 			if ( hit.z != NOHIT ) {
 				norm = getGradientLevelSet ( gvdb, chan, p+o );
@@ -404,8 +404,10 @@ __device__ void rayLevelSetBrick ( VDBInfo* gvdb, uchar chan, int nodeid, float3
 				return;
 			}
 		}	
-		p += SCN_DIRECTSTEP*dir;
-		t.x += SCN_DIRECTSTEP;
+		//p += SCN_DIRECTSTEP*dir;
+		p += 0.011f * dir;
+		//t.x += SCN_DIRECTSTEP;
+		t.x += 0.01f;
 	}
 }
 
